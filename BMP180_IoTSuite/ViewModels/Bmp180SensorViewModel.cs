@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.UI.Popups;
+using Windows.UI.Xaml;
 using static BMP180_IoTSuite.Models.Bmp180Sensor;
 
 namespace BMP180_IoTSuite.ViewModels
@@ -18,7 +19,7 @@ namespace BMP180_IoTSuite.ViewModels
         private double temperature, pressure, altitude;
         private string lastUpdated;
         private Bmp180Sensor _bmp180;
-        private Timer _periodicTimer;
+        private DispatcherTimer _periodicTimer;
 
         static DeviceClient deviceClient;
         static string iotHubUri = "projectalpha-hub.azure-devices.net";
@@ -125,18 +126,16 @@ namespace BMP180_IoTSuite.ViewModels
             if (_bmp180 == null)
                 return;
 
-            if (_periodicTimer == null)
-            {
-                // get sensor data every 10 seconds
-                _periodicTimer = new Timer(TimerCallback, null, 0, 10000);
-            }
-            else
-            {
-                _periodicTimer.Dispose();
-            }
+
+            // get sensor data every 10 seconds
+            _periodicTimer = new DispatcherTimer();
+            _periodicTimer.Interval = TimeSpan.FromSeconds(10);
+            _periodicTimer.Tick += _periodicTimer_Tick;
+            _periodicTimer.Start();
+                       
         }
 
-        private async void TimerCallback(object state)
+        private async void _periodicTimer_Tick(object sender, object e)
         {
             Bmp180SensorData sensorData = null;
 
@@ -153,7 +152,7 @@ namespace BMP180_IoTSuite.ViewModels
             catch (Exception)
             {
                 LastUpdated = "Sensor Error! Can't get values from sensor.";
-            }           
+            }
 
             if (sensorData != null)
             {
@@ -180,7 +179,7 @@ namespace BMP180_IoTSuite.ViewModels
             await deviceClient.SendEventAsync(message);
         }
 
-        private async Task GetCurrentLocationAsync()
+        private async void GetCurrentLocationAsync()
         {
             await LocationManager.GetCurrentPositionAsync();
         }
