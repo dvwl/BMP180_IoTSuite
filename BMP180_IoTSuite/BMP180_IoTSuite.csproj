@@ -134,7 +134,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Converter\" />
+    <Folder Include="Converters\" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsIoT, Version=10.0.10240.0">
